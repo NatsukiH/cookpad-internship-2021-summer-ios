@@ -1,10 +1,52 @@
 import SwiftUI
 
 struct ProductDetailPageView: View {
+    @EnvironmentObject var cartState: CartState
+    @State var isCartViewPresented: Bool = false
+    
     var product: FetchProductsQuery.Data.Product
     var body: some View {
-        Text("Hello World")
-            .navigationTitle(product.name)
+        
+        GeometryReader { bodyView in
+            ScrollView {
+                VStack(alignment: .leading) {
+                    RemoteImage(urlString: product.imageUrl)
+                        .frame(width: bodyView.size.width, height: 300)
+                    Text(product.name)
+                        .frame(height: 20)
+                    Text("\(product.price)円")
+                        .frame(height: 40)
+                    Text(product.summary)
+//                        .frame(height: 50)
+                    Button(action: { cartState.add(product: product)}){
+                        Text("カートに追加")
+                            .padding()
+                            .foregroundColor(Color.white)
+                            .background(Color.orange)
+                            .cornerRadius(10)
+                            
+                    }
+                    .frame(width: bodyView.size.width, height: 50, alignment: .center)
+                }.padding(.vertical, 8)
+            }
+        }
+        .toolbar {
+            ToolbarItemGroup(placement: .navigationBarTrailing) {
+                Button(action: {
+                        self.isCartViewPresented = true
+                }){
+                    VStack(){
+                        Image(systemName: "folder")
+                        Text("\(cartState.totalProductCounts)")
+                    }
+                }
+            }
+        }
+        .sheet(isPresented: $isCartViewPresented) {
+            NavigationView {
+                CartPageView()
+            }
+        }
     }
 }
 
